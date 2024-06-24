@@ -29,7 +29,9 @@ data class KVStringTransformer(
 
 }
 
-abstract class AbstractSerializer : Serializer {
+abstract class AbstractSerializer(
+    val defaultDir: String = ""
+) : Serializer {
 
     private val transformers: MutableList<StringTransformer> = mutableListOf()
 
@@ -60,6 +62,19 @@ inline fun <reified T> Serializer.serializeToString(obj: T): String {
 
 inline fun <reified T> Serializer.writeToFile(obj: T, path: String) {
     val file = File(path)
+    if (!file.exists()) {
+        file.createNewFile()
+    }
+
+    file.writeText(serializeToString(obj))
+}
+
+inline fun <reified T> AbstractSerializer.writeToFile(obj: T, path: String) {
+    if (defaultDir.isNotBlank()) {
+        File(defaultDir).mkdirs()
+    }
+
+    val file = File("$defaultDir/$path")
     if (!file.exists()) {
         file.createNewFile()
     }

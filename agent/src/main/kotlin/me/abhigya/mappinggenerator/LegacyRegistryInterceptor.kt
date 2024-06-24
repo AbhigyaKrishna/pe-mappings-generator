@@ -106,7 +106,7 @@ object LegacyRegistryInterceptor : Transformer {
         }
     }
 
-    object DedicatedServerDelegate : AbstractSerializer(), Runnable {
+    object DedicatedServerDelegate : AbstractSerializer("mappings"), Runnable {
         override fun run() {
             println("Serializing entity data type")
             writeToFile(
@@ -151,10 +151,6 @@ object LegacyRegistryInterceptor : Transformer {
         val clazz: String,
         val field: String
     ) {
-        companion object {
-            lateinit var mapField: String
-        }
-
         val registry: Any by lazy {
             Class.forName(clazz)
                 .getDeclaredField(field)
