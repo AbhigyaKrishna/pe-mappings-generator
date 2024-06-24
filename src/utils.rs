@@ -1,41 +1,15 @@
 use std::fs::File;
+use std::io;
 use std::io::BufReader;
-use std::path::Path;
-use std::sync::Mutex;
-use std::time::Duration;
-use crate::Result;
+use std::sync::{Arc, Mutex};
 
-use downloader::{Download, Downloader, DownloadSummary, Progress, Verify};
+use downloader::{Verification, Verify};
 use downloader::progress::Reporter;
-use crate::metadata::{JavaHome, McMetaData};
+use hex::ToHex;
+use sha1::{Digest, Sha1};
 
-pub fn download_file(path: &Path, uri: &str, file_name: Option<&str>, verify: Option<Verify>, progress: Option<Progress>) -> Result<Vec<downloader::Result<DownloadSummary>>> {
-    let mut downloader = Downloader::builder()
-        .download_folder(path)
-        .timeout(Duration::from_secs(30))
-        .build()
-        .unwrap();
-
-    let mut download = Download::new(uri);
-    if let Some(path) = file_name {
-        download = download.file_name(Path::new(path));
-    }
-    if let Some(verify) = verify {
-        download = download.verify(verify);
-    }
-    if let Some(progress) = progress {
-        download = download.progress(progress);
-    }
-
-    Ok(downloader.download(&[download])?)
-}
-
-pub async fn get_mc_version_metadata() -> Result<McMetaData> {
-    Ok(reqwest::get("https://launchermeta.mojang.com/mc/game/version_manifest.json")
-        .await?
-        .json::<McMetaData>()
-        .await?)
-}
+use crate::metadata::JavaHome;
+use crate::Result;
 
 pub fn get_java_home() -> Result<JavaHome> {
     Ok(serde_json::from_reader(BufReader::new(File::open("java_home.json")?))?)
@@ -70,4 +44,19 @@ impl Reporter for ProgressReporter {
     fn done(&self) {
         println!("Download Complete!");
     }
+}
+
+pub fn get_sha1_verify(checksum: String) -> Verify {
+    Arc::new(move |path, _| {
+        let mut file = File::open(path).unwrap();
+        let mut hasher = Sha1::new();
+        let _ = io::copy(&mut file, &mut hasher);
+        let hash = hasher.finalize();
+
+        if hash.iter().encode_hex::<String>() == checksum {
+            Verification::Ok
+        } else {
+            Verification::Failed
+        }
+    })
 }
