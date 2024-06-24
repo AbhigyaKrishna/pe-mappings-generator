@@ -20,7 +20,7 @@ mod download;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let path = Path::new("work");
+    let path = Path::new("../../work");
 
     if !path.exists() {
         create_dir_all(&path)?;

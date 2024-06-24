@@ -13,7 +13,7 @@ use crate::metadata::JavaHome;
 use crate::Result;
 
 pub fn get_java_home() -> Result<JavaHome> {
-    Ok(serde_json::from_reader(BufReader::new(File::open("java_home.json")?))?)
+    Ok(serde_json::from_reader(BufReader::new(File::open("../../java_home.json")?))?)
 }
 
 pub fn get_java_for_version(version: &str, java_home: &JavaHome) -> Result<PathBuf> {
