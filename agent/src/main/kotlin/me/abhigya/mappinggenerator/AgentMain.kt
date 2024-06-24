@@ -2,6 +2,8 @@
 
 package me.abhigya.mappinggenerator
 
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.Json
 import net.bytebuddy.agent.ByteBuddyAgent
 import net.bytebuddy.agent.builder.AgentBuilder
 import net.bytebuddy.description.type.TypeDescription
@@ -36,4 +38,12 @@ interface Transformer {
 
     fun install(builder: DynamicType.Builder<*>, type: TypeDescription): DynamicType.Builder<*>
 
+}
+
+@OptIn(ExperimentalSerializationApi::class)
+val PrettyJson = Json {
+    prettyPrint = true
+    encodeDefaults = true
+    explicitNulls = true
+    prettyPrintIndent = "  "
 }
