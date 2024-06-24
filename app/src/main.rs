@@ -68,7 +68,7 @@ async fn work(version: &str, path: &Path, java_home: &JavaHome, agent: &Path) ->
     }
 
     let agent = fs::canonicalize(agent)?;
-    let status = Exec::shell(format!("{} -Xmx2048M -Xms2048M -javaagent:{} -jar server.jar nogui", java.display(), agent.display()))
+    let status = Exec::shell(format!("{} -Xmx2048M -Xms2048M -XX:+StartAttachListener -javaagent:{} -jar server.jar nogui", java.display(), agent.display()))
         .cwd(&work_dir)
         .stdout(Redirection::Merge)
         .stderr(Redirection::Merge)

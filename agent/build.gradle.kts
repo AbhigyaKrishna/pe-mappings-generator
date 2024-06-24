@@ -1,5 +1,6 @@
 plugins {
     kotlin("jvm")
+    kotlin("plugin.serialization") version "1.9.21"
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
@@ -8,7 +9,9 @@ kotlin {
 }
 
 dependencies {
-    implementation("org.javassist:javassist:3.30.0-GA")
+    implementation("net.bytebuddy:byte-buddy:1.14.17")
+    implementation("net.bytebuddy:byte-buddy-agent:1.14.17")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 }
 
 tasks {
