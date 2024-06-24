@@ -5,9 +5,14 @@ package me.abhigya.mappinggenerator
 import java.lang.instrument.Instrumentation
 
 fun premain(arguments: String?, instrumentation: Instrumentation) {
-    println("Hello from AgentX 'premain'!")
-}
+    println("Mapping Generator Agent Loaded")
+    instrumentation.addTransformer(RegistryTransformer(), true)
 
-fun main(args: Array<String>) {
-    println("Hello from AgentX 'main'!")
+//    for (clazz in instrumentation.allLoadedClasses) {
+//        try {
+//            instrumentation.retransformClasses(clazz)
+//        } catch (e: Exception) {
+//            println("Cannot transform " + clazz.name)
+//        }
+//    }
 }
