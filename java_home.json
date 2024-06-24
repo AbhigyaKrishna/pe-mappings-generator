@@ -1,0 +1,6 @@
+{
+  "21": "/usr/lib/jvm/java-21-openjdk",
+  "17": "/usr/lib/jvm/java-17-openjdk",
+  "11": "/usr/lib/jvm/java-11-openjdk",
+  "8": "/usr/lib/jvm/java-8-openjdk"
+}
