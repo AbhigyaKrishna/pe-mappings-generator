@@ -11,7 +11,6 @@ reqwest = { version = "0.12.5", features = ["json"]}
 downloader = "0.2.7"
 serde_json = "1.0.117"
 serde = { version = "1.0.203", features = ["derive"] }
-chrono = { version = "0.4.38", features = ["serde"] }
 subprocess = "0.2.9"
 futures = "0.3.30"
 sha1 = "0.11.0-pre.3"

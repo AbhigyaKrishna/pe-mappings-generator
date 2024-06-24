@@ -1,6 +1,6 @@
 use std::fs::{create_dir_all, File};
 use std::io::Write;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use hex::ToHex;
 use sha1::Digest;
@@ -8,7 +8,8 @@ use subprocess::{Exec, Redirection};
 
 use crate::download::download_build_tool;
 use crate::error::{Error, Result};
-use crate::metadata::{JavaHome};
+use crate::metadata::JavaHome;
+use crate::utils::get_java_for_version;
 use crate::versions::VERSIONS;
 
 mod versions;
@@ -90,21 +91,4 @@ async fn download_server(path: &Path, version: &str, java: &Path) -> Result<()> 
     }
 
     Ok(())
-}
-
-fn get_java_for_version(version: &str, java_home: &JavaHome) -> Result<PathBuf> {
-    let jvm = if version.starts_with("1.8") || version.starts_with("1.9") || version.starts_with("1.10") || version.starts_with("1.11") || version.starts_with("1.12") {
-        java_home._8.as_str()
-    } else if version.starts_with("1.13") || version.starts_with("1.14") || version.starts_with("1.15") || version.starts_with("1.16") {
-        java_home._11.as_str()
-    } else if version.starts_with("1.17")  {
-        java_home._17.as_str()
-    } else {
-        java_home._21.as_str()
-    };
-
-    let mut path = PathBuf::from(jvm);
-    path.push("jre/bin/java");
-
-    Ok(path)
 }

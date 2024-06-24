@@ -1,6 +1,7 @@
 use std::fs::File;
 use std::io;
 use std::io::BufReader;
+use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
 use downloader::{Verification, Verify};
@@ -13,6 +14,23 @@ use crate::Result;
 
 pub fn get_java_home() -> Result<JavaHome> {
     Ok(serde_json::from_reader(BufReader::new(File::open("java_home.json")?))?)
+}
+
+pub fn get_java_for_version(version: &str, java_home: &JavaHome) -> Result<PathBuf> {
+    let jvm = if version.starts_with("1.8") || version.starts_with("1.9") || version.starts_with("1.10") || version.starts_with("1.11") || version.starts_with("1.12") {
+        java_home._8.as_str()
+    } else if version.starts_with("1.13") || version.starts_with("1.14") || version.starts_with("1.15") || version.starts_with("1.16") {
+        java_home._11.as_str()
+    } else if version.starts_with("1.17")  {
+        java_home._17.as_str()
+    } else {
+        java_home._21.as_str()
+    };
+
+    let mut path = PathBuf::from(jvm);
+    path.push("jre/bin/java");
+
+    Ok(path)
 }
 
 #[derive(Debug, Default)]
