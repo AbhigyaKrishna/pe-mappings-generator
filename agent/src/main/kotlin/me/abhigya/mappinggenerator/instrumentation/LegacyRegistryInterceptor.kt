@@ -44,7 +44,7 @@ object LegacyRegistryInterceptor : Transformer {
         } else if (type.matches(versionRegex("RegistrySimple"))) {
             builder.defineMethod("getMap", Map::class.java, Visibility.PUBLIC)
                 .intercept(RegistrySimpleInstrument)
-        } else if (type.matches(versionRegex("RegistryID"))) {
+        } else if (type.matches(versionRegex("(RegistryID|RegistryBlockID)"))) {
             builder
                 .defineMethod("getMap", Map::class.java, Visibility.PUBLIC)
                 .intercept(RegistryIdInstrument)
@@ -74,27 +74,29 @@ object LegacyRegistryInterceptor : Transformer {
 
             println("Serializing registries")
             for ((type, target) in registries) {
-                val field = Class.forName(type).getField(target).get(null)
+                val field = Class.forName(type).getDeclaredField(target).apply {
+                    isAccessible = true
+                }.get(null)
                 val typeName = field.javaClass.name
                 println("Found $target in $type with type $typeName")
                 val entries = if (typeName.endsWith("ID")) {
                     val registry = RegistryId(field)
                     registry.map.map {
-                        it.value to it.key.toString().replace("minecraft:", "")
+                        it.value.toString() to it.key.toString()
                     }.sortedBy { it.first }
-                        .map { it.second }
+                        .toMap()
                 } else if (typeName.endsWith("Simple") || typeName.endsWith("Default")) {
                     val registry = RegistrySimple(field)
                     registry.map.map {
-                        it.value.toString() to it.key.toString().replace("minecraft:", "")
+                        it.value.toString() to it.key.toString()
                     }.sortedBy { it.first }
-                        .map { it.second }
+                        .toMap()
                 } else {
                     val registry = RegistryMaterials(field)
                     registry.map.map {
-                        registry.registryId.map[it.value] to it.key.toString().replace("minecraft:", "")
+                        registry.registryId.map[it.value] to it.key.toString()
                     }.sortedBy { it.first }
-                        .map { it.second }
+                        .associate { it.first.toString() to it.second }
                 }
 
                 writeToFile(entries, "${type.takeLastWhile { it != '.' }}_${typeName.takeLastWhile { it != '.' }}.json")

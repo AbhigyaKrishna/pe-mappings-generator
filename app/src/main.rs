@@ -35,7 +35,7 @@ async fn main() -> Result<()> {
         println!("Working on version: {}", version);
 
         work(&version, &path, &java, &agent).await?;
-        break;
+//         break;
     }
 
     Ok(())

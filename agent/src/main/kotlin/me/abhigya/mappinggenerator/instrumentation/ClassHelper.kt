@@ -2,7 +2,6 @@ package me.abhigya.mappinggenerator.instrumentation
 
 import net.bytebuddy.description.type.TypeDescription
 import java.lang.reflect.Field
-import java.util.IdentityHashMap
 
 data class DataWatcher(
     val clazz: String,
@@ -21,26 +20,34 @@ data class DataWatcher(
 class RegistryId(
     private val internal: Any
 ) {
-    val map: IdentityHashMap<Any, Int> by lazy {
-        internal.javaClass
-            .getMethod("getMap")
-            .apply {
-                isAccessible = true
-            }
-            .invoke(internal) as IdentityHashMap<Any, Int>
+    val map: Map<Any?, Int> by lazy {
+        fun tryGetMethod(clazz: Class<*>) = runCatching {
+            clazz.getDeclaredMethod("getMap")
+        }
+
+        var clazz: Class<*>? = internal.javaClass
+        while (clazz != null) {
+            tryGetMethod(clazz)
+                .onSuccess {
+                    return@lazy it.invoke(internal) as Map<Any?, Int>
+                }
+            clazz = clazz.superclass
+        }
+
+        throw NoSuchMethodException("getMap in class ${internal.javaClass}")
     }
 }
 
 open class RegistrySimple(
     protected val internal: Any
 ) {
-    val map: Map<Any, Any> by lazy {
+    val map: Map<Any?, Any?> by lazy {
         internal.javaClass
             .getMethod("getMap")
             .apply {
                 isAccessible = true
             }
-            .invoke(internal) as Map<Any, Any>
+            .invoke(internal) as Map<Any?, Any?>
     }
 }
 

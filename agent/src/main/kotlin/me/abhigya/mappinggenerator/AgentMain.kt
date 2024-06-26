@@ -9,8 +9,9 @@ import net.bytebuddy.agent.ByteBuddyAgent
 import net.bytebuddy.agent.builder.AgentBuilder
 import net.bytebuddy.description.type.TypeDescription
 import net.bytebuddy.dynamic.DynamicType
+import java.io.File
+import java.io.PrintStream
 import java.lang.instrument.Instrumentation
-import java.util.IdentityHashMap
 
 
 val transformers = listOf(
@@ -24,6 +25,7 @@ fun premain(arguments: String?, instrumentation: Instrumentation) {
     transformers.forEach {
         println("Installing ${it.javaClass.simpleName} transformer...")
         AgentBuilder.Default()
+            .with(AgentBuilder.Listener.StreamWriting(PrintStream(File("agent.log"))))
             .run {
                 it.configure(this)
             }
@@ -31,14 +33,6 @@ fun premain(arguments: String?, instrumentation: Instrumentation) {
                 it.install(builder, type)
             }
             .installOn(instrumentation)
-    }
-}
-
-fun test() {
-    val map = IdentityHashMap<Int, Any>()
-    val arr = arrayOf("1", "2", "3", "4", "5")
-    for (i in arr.indices) {
-        map[i] = arr[i]
     }
 }
 
