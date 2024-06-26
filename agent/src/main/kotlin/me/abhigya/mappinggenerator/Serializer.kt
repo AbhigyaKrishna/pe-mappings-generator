@@ -74,7 +74,7 @@ inline fun <reified T> AbstractSerializer.writeToFile(obj: T, path: String) {
         File(defaultDir).mkdirs()
     }
 
-    val file = File("$defaultDir/$path")
+    val file = File(defaultDir, path)
     if (!file.exists()) {
         file.createNewFile()
     }
