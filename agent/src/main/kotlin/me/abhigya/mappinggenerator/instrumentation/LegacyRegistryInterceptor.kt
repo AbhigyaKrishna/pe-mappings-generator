@@ -68,7 +68,7 @@ object LegacyRegistryInterceptor : Transformer {
                         .map { it.key.simpleName.lowercase() }
                         .toList()
                         .also { println(it) },
-                    "entity_data_types.json"
+                    "DataWatcherRegistry.json"
                 )
             }
 
@@ -79,28 +79,35 @@ object LegacyRegistryInterceptor : Transformer {
                 }.get(null)
                 val typeName = field.javaClass.name
                 println("Found $target in $type with type $typeName")
+
                 val entries = if (typeName.endsWith("ID")) {
                     val registry = RegistryId(field)
                     registry.map.map {
-                        it.value.toString() to it.key.toString()
-                    }.sortedBy { it.first }
-                        .toMap()
+                        it.value as Any? to it.key
+                    }.runOperation()
                 } else if (typeName.endsWith("Simple") || typeName.endsWith("Default")) {
                     val registry = RegistrySimple(field)
                     registry.map.map {
-                        it.value.toString() to it.key.toString()
-                    }.sortedBy { it.first }
-                        .toMap()
+                        it.value to it.key
+                    }.runOperation()
                 } else {
                     val registry = RegistryMaterials(field)
                     registry.map.map {
-                        registry.registryId.map[it.value] to it.key.toString()
-                    }.sortedBy { it.first }
-                        .associate { it.first.toString() to it.second }
+                        registry.registryId.map[it.value] as Any? to it.key
+                    }.runOperation()
                 }
 
                 writeToFile(entries, "${type.takeLastWhile { it != '.' }}_${typeName.takeLastWhile { it != '.' }}.json")
             }
+        }
+
+        private fun List<Pair<Any?, Any?>>.runOperation(): Map<String, String> {
+            return run {
+                KVMappers.fold(this) { acc, mapper -> acc.map { mapper.map(it.first, it.second) } }
+            }
+                .map { it.first.toString() to it.second.toString() }
+                .sortedBy { it.first }
+                .toMap()
         }
     }
 
