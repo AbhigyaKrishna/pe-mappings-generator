@@ -1,7 +1,6 @@
 package me.abhigya.mappinggenerator.instrumentation
 
 import me.abhigya.mappinggenerator.AbstractSerializer
-import me.abhigya.mappinggenerator.KVStringTransformer
 import me.abhigya.mappinggenerator.Transformer
 import me.abhigya.mappinggenerator.writeToFile
 import net.bytebuddy.agent.builder.AgentBuilder
@@ -25,8 +24,6 @@ object LegacyRegistryInterceptor : Transformer {
     private var dataWatcher: DataWatcher? = null
 
     override fun configure(builder: AgentBuilder): AgentBuilder.Identified.Narrowable {
-        DedicatedServerDelegate.addStringTransformer(KVStringTransformer("vector3f", "rotation"))
-
         return builder.type(ElementMatchers.nameStartsWith("net.minecraft"))
     }
 
@@ -47,15 +44,7 @@ object LegacyRegistryInterceptor : Transformer {
         } else if (type.matches(versionRegex("RegistrySimple"))) {
             builder.defineMethod("getMap", Map::class.java, Visibility.PUBLIC)
                 .intercept(RegistrySimpleInstrument)
-        }
-//        else if (type.matches(versionRegex("RegistryMaterials"))
-//            && type.declaredMethods.filter(ElementMatchers.named("getId")).isEmpty()) {
-//            builder
-//                .defineMethod("getId", Int::class.javaPrimitiveType!!, Visibility.PUBLIC)
-//                .withParameters(Any::class.java)
-//                .intercept(RegistryMaterialsInstrument)
-//        }
-        else if (type.matches(versionRegex("RegistryID"))) {
+        } else if (type.matches(versionRegex("RegistryID"))) {
             builder
                 .defineMethod("getMap", Map::class.java, Visibility.PUBLIC)
                 .intercept(RegistryIdInstrument)
@@ -78,7 +67,6 @@ object LegacyRegistryInterceptor : Transformer {
                         .sortedBy { it.value }
                         .map { it.key.simpleName.lowercase() }
                         .toList()
-                        .transform()
                         .also { println(it) },
                     "entity_data_types.json"
                 )
