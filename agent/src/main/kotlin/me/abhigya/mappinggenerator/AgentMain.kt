@@ -5,6 +5,7 @@ package me.abhigya.mappinggenerator
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import me.abhigya.mappinggenerator.instrumentation.legacy.LegacyRegistryInterceptor
+import me.abhigya.mappinggenerator.instrumentation.modern.ModernRegistryInterceptor
 import net.bytebuddy.agent.ByteBuddyAgent
 import net.bytebuddy.agent.builder.AgentBuilder
 import net.bytebuddy.description.type.TypeDescription
@@ -15,7 +16,8 @@ import java.lang.instrument.Instrumentation
 
 
 val transformers = listOf(
-    LegacyRegistryInterceptor
+//    LegacyRegistryInterceptor,
+    ModernRegistryInterceptor
 )
 
 fun premain(arguments: String?, instrumentation: Instrumentation) {
@@ -36,7 +38,7 @@ fun premain(arguments: String?, instrumentation: Instrumentation) {
     }
 }
 
-interface Transformer {
+interface Interceptor {
 
     fun configure(builder: AgentBuilder): AgentBuilder.Identified.Narrowable
 

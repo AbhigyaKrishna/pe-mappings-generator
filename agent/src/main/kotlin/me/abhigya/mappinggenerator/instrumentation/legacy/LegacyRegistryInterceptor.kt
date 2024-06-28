@@ -1,9 +1,11 @@
 package me.abhigya.mappinggenerator.instrumentation.legacy
 
 import me.abhigya.mappinggenerator.AbstractSerializer
-import me.abhigya.mappinggenerator.Transformer
+import me.abhigya.mappinggenerator.Interceptor
 import me.abhigya.mappinggenerator.instrumentation.DataWatcherRegistryMapper
 import me.abhigya.mappinggenerator.instrumentation.KVMappers
+import me.abhigya.mappinggenerator.instrumentation.MapHelper
+import me.abhigya.mappinggenerator.instrumentation.doesClassMatches
 import me.abhigya.mappinggenerator.writeToFile
 import net.bytebuddy.agent.builder.AgentBuilder
 import net.bytebuddy.description.field.FieldDescription
@@ -14,13 +16,7 @@ import net.bytebuddy.implementation.MethodCall
 import net.bytebuddy.implementation.SuperMethodCall
 import net.bytebuddy.matcher.ElementMatchers
 
-object LegacyRegistryInterceptor : Transformer {
-
-//    private val VER_REGEX = "net\\.minecraft\\.server\\.v1_\\d+_R\\d\\."
-//
-//    private fun versionRegex(clazz: String): Regex {
-//        return Regex(VER_REGEX + clazz)
-//    }
+object LegacyRegistryInterceptor : Interceptor {
 
     private val registries: MutableList<Pair<String, String>> = mutableListOf()
     private var dataWatcher: DataWatcher? = null
@@ -66,7 +62,7 @@ object LegacyRegistryInterceptor : Transformer {
         }
     }
 
-    object DedicatedServerDelegate : AbstractSerializer("mappings"), Runnable {
+    object DedicatedServerDelegate : AbstractSerializer("mappings"), Runnable, MapHelper {
         override fun run() {
             dataWatcher?.let {
                 println("Serializing entity data type")
@@ -107,15 +103,6 @@ object LegacyRegistryInterceptor : Transformer {
 
                 writeToFile(entries, "${type.takeLastWhile { it != '.' }}_${target}_${typeName.takeLastWhile { it != '.' }}.json")
             }
-        }
-
-        private fun List<Pair<Any?, Any?>>.runOperation(): Map<String, String> {
-            return run {
-                KVMappers.fold(this) { acc, mapper -> acc.map { DataWatcherRegistryMapper.map(it.first, it.second) } }
-            }
-                .map { it.first.toString() to it.second.toString() }
-                .sortedBy { it.first }
-                .toMap()
         }
     }
 

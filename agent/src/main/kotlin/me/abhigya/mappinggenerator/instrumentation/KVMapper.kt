@@ -23,6 +23,19 @@ object DataWatcherRegistryMapper : KVMapper {
 
 }
 
+interface MapHelper {
+
+    fun List<Pair<Any?, Any?>>.runOperation(): Map<String, String> {
+        return run {
+            KVMappers.fold(this) { acc, mapper -> acc.map { DataWatcherRegistryMapper.map(it.first, it.second) } }
+        }
+            .map { it.first.toString() to it.second.toString() }
+            .sortedBy { it.first }
+            .toMap()
+    }
+
+}
+
 val KVMappers = listOf(
     DataWatcherRegistryMapper
 )

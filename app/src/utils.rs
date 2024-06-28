@@ -21,7 +21,7 @@ pub fn get_java_for_version(version: &str, java_home: &JavaHome) -> Result<PathB
         java_home._8.as_str()
     } else if version.starts_with("1.13") || version.starts_with("1.14") || version.starts_with("1.15") || version.starts_with("1.16") {
         java_home._11.as_str()
-    } else if version.starts_with("1.17")  {
+    } else if version.starts_with("1.17") || version.starts_with("1.18") || version.starts_with("1.19")  {
         java_home._17.as_str()
     } else {
         java_home._21.as_str()
