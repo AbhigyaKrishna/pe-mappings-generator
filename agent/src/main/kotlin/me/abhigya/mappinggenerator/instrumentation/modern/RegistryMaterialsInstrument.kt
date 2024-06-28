@@ -22,6 +22,11 @@ object RegistryMaterialsInstrument : Implementation {
                 .and(ElementMatchers.isFinal()))
             .only
 
+        val getKey = thisType.declaredMethods
+            .filter(ElementMatchers.not(ElementMatchers.isStatic())
+                .and(ElementMatchers.returns { it.name.endsWith("MinecraftKey") }))
+            .only
+
         val loop = Label()
         val end = Label()
 
@@ -53,7 +58,7 @@ object RegistryMaterialsInstrument : Implementation {
             visitor.visitFieldInsn(Opcodes.GETFIELD, thisType.internalName, field.internalName, field.descriptor) // 0
             visitor.visitVarInsn(Opcodes.ILOAD, 2) // 1
             visitor.visitMethodInsn(Opcodes.INVOKEINTERFACE, field.descriptor.drop(1).dropLast(1), "get", "(I)Ljava/lang/Object;", true) // 0
-            visitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, thisType.internalName, "getKey", "(Ljava/lang/Object;)Lnet/minecraft/resources/MinecraftKey;", false) // 0
+            visitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, thisType.internalName, getKey.internalName, "(Ljava/lang/Object;)Lnet/minecraft/resources/MinecraftKey;", false) // 0
             visitor.visitMethodInsn(Opcodes.INVOKEINTERFACE, "java/util/Map", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", true) // 0
             visitor.visitInsn(Opcodes.POP) // -1
             visitor.visitIincInsn(2, 1) // 0
@@ -65,7 +70,7 @@ object RegistryMaterialsInstrument : Implementation {
             visitor.visitInsn(Opcodes.ARETURN) // -1
             visitor.visitEnd()
 
-            ByteCodeAppender.Size(8, 5)
+            ByteCodeAppender.Size(6, 5)
         }
     }
 

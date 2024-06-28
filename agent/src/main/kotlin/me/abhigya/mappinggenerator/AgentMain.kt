@@ -31,8 +31,8 @@ fun premain(arguments: String?, instrumentation: Instrumentation) {
             .run {
                 it.configure(this)
             }
-            .transform { builder, type, _, _, _ ->
-                it.install(builder, type)
+            .transform { builder, type, loader, _, _ ->
+                it.install(builder, type, loader)
             }
             .installOn(instrumentation)
     }
@@ -42,7 +42,7 @@ interface Interceptor {
 
     fun configure(builder: AgentBuilder): AgentBuilder.Identified.Narrowable
 
-    fun install(builder: DynamicType.Builder<*>, type: TypeDescription): DynamicType.Builder<*>
+    fun install(builder: DynamicType.Builder<*>, type: TypeDescription, classLoader: ClassLoader): DynamicType.Builder<*>
 
 }
 

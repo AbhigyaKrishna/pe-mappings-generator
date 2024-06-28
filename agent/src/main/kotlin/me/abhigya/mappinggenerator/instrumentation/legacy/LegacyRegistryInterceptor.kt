@@ -2,8 +2,6 @@ package me.abhigya.mappinggenerator.instrumentation.legacy
 
 import me.abhigya.mappinggenerator.AbstractSerializer
 import me.abhigya.mappinggenerator.Interceptor
-import me.abhigya.mappinggenerator.instrumentation.DataWatcherRegistryMapper
-import me.abhigya.mappinggenerator.instrumentation.KVMappers
 import me.abhigya.mappinggenerator.instrumentation.MapHelper
 import me.abhigya.mappinggenerator.instrumentation.doesClassMatches
 import me.abhigya.mappinggenerator.writeToFile
@@ -25,7 +23,7 @@ object LegacyRegistryInterceptor : Interceptor {
         return builder.type(ElementMatchers.nameStartsWith("net.minecraft"))
     }
 
-    override fun install(builder: DynamicType.Builder<*>, type: TypeDescription): DynamicType.Builder<*> {
+    override fun install(builder: DynamicType.Builder<*>, type: TypeDescription, classLoader: ClassLoader): DynamicType.Builder<*> {
         return if (type.doesClassMatches("DataWatcher") && type.name.contains(Regex("\\.v1_8_R\\d\\."))) { // only in 1.8
             builder.field(ElementMatchers.fieldType<FieldDescription>(Map::class.java)
                 .and(ElementMatchers.isStatic())

@@ -23,7 +23,7 @@ class RegistryMaterials(
     val getKey: (Any) -> Any? by lazy {
         val fn = internal.javaClass
             .declaredMethods
-            .first { it.name == "getKey" };
+            .first { it.returnType.name.endsWith("MinecraftKey") };
 
         { key -> fn.invoke(internal, key) }
     }
