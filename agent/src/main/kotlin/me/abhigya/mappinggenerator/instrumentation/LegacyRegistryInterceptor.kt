@@ -14,11 +14,11 @@ import net.bytebuddy.matcher.ElementMatchers
 
 object LegacyRegistryInterceptor : Transformer {
 
-    private val VER_REGEX = "net\\.minecraft\\.server\\.v1_\\d+_R\\d\\."
-
-    fun versionRegex(clazz: String): Regex {
-        return Regex(VER_REGEX + clazz)
-    }
+//    private val VER_REGEX = "net\\.minecraft\\.server\\.v1_\\d+_R\\d\\."
+//
+//    private fun versionRegex(clazz: String): Regex {
+//        return Regex(VER_REGEX + clazz)
+//    }
 
     private val registries: MutableList<Pair<String, String>> = mutableListOf()
     private var dataWatcher: DataWatcher? = null
@@ -28,7 +28,7 @@ object LegacyRegistryInterceptor : Transformer {
     }
 
     override fun install(builder: DynamicType.Builder<*>, type: TypeDescription): DynamicType.Builder<*> {
-        return if (type.matches(versionRegex("DataWatcher")) && type.name.contains(Regex("\\.v1_8_R\\d\\."))) { // only in 1.8
+        return if (type.doesClassMatches("DataWatcher") && type.name.contains(Regex("\\.v1_8_R\\d\\."))) { // only in 1.8
             builder.field(ElementMatchers.fieldType<FieldDescription>(Map::class.java)
                 .and(ElementMatchers.isStatic())
                 .and(ElementMatchers.isPrivate())
@@ -37,25 +37,25 @@ object LegacyRegistryInterceptor : Transformer {
                     dataWatcher = DataWatcher(type.name, target.name)
                     target
                 }
-        } else if (type.matches(versionRegex("(MinecraftServer|DedicatedServer)"))) {
+        } else if (type.doesClassMatches("(MinecraftServer|DedicatedServer)")) {
             builder
                 .method(ElementMatchers.named("init"))
                 .intercept(SuperMethodCall.INSTANCE.andThen(MethodCall.run(DedicatedServerDelegate)))
-        } else if (type.matches(versionRegex("RegistrySimple"))) {
+        } else if (type.doesClassMatches("RegistrySimple")) {
             builder
                 .defineMethod("getMap", Map::class.java, Visibility.PUBLIC)
                 .intercept(RegistrySimpleInstrument)
-        } else if (type.matches(versionRegex("RegistryMaterials")) && type.superClass?.asErasure()?.typeName?.endsWith("RegistrySimple") != true) { // >= 1.13.1
+        } else if (type.doesClassMatches("RegistryMaterials") && type.superClass?.asErasure()?.typeName?.endsWith("RegistrySimple") != true) { // >= 1.13.1
             builder
                 .defineMethod("getMap", Map::class.java, Visibility.PUBLIC)
                 .intercept(RegistrySimpleInstrument)
-        } else if (type.matches(versionRegex("(RegistryID|RegistryBlockID)"))) {
+        } else if (type.doesClassMatches("(RegistryID|RegistryBlockID)")) {
             builder
                 .defineMethod("getMap", Map::class.java, Visibility.PUBLIC)
                 .intercept(RegistryIdInstrument)
         } else {
             builder
-                .field(ElementMatchers.fieldType<FieldDescription> { it.matches(versionRegex("I?Registry\\w*")) }
+                .field(ElementMatchers.fieldType<FieldDescription> { it.doesClassMatches("I?Registry\\w*") }
                 .and(ElementMatchers.isStatic()))
                 .transform { _, target ->
                     registries.add(type.name to target.name)
