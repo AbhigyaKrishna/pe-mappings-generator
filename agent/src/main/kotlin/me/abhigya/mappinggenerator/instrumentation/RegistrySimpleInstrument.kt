@@ -19,7 +19,7 @@ object RegistrySimpleInstrument : Implementation {
         val thisType = implementationTarget.instrumentedType
         val field = thisType.declaredFields
             .filter(
-                ElementMatchers.fieldType<FieldDescription.InDefinedShape>(Map::class.java)
+                ElementMatchers.fieldType<FieldDescription.InDefinedShape> { it.isInHierarchyWith(Map::class.java) }
                 .and(ElementMatchers.isProtected())
                 .and(ElementMatchers.isFinal()))
             .only

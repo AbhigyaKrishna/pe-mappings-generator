@@ -54,11 +54,8 @@ object LegacyRegistryInterceptor : Transformer {
                 .defineMethod("getMap", Map::class.java, Visibility.PUBLIC)
                 .intercept(RegistryIdInstrument)
         } else {
-            if (type.matches(versionRegex("I?Registry\\w+?"))) {
-                println("Found registry ${type.name}")
-            }
             builder
-                .field(ElementMatchers.fieldType<FieldDescription> { it.matches(versionRegex("I?Registry\\w+?")) }
+                .field(ElementMatchers.fieldType<FieldDescription> { it.matches(versionRegex("I?Registry\\w*")) }
                 .and(ElementMatchers.isStatic()))
                 .transform { _, target ->
                     registries.add(type.name to target.name)
@@ -106,7 +103,7 @@ object LegacyRegistryInterceptor : Transformer {
                     }.runOperation()
                 }
 
-                writeToFile(entries, "${type.takeLastWhile { it != '.' }}_${typeName.takeLastWhile { it != '.' }}.json")
+                writeToFile(entries, "${type.takeLastWhile { it != '.' }}_${target}_${typeName.takeLastWhile { it != '.' }}.json")
             }
         }
 
