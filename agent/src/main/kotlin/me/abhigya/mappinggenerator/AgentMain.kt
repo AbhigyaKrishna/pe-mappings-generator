@@ -4,7 +4,7 @@ package me.abhigya.mappinggenerator
 
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
-import me.abhigya.mappinggenerator.instrumentation.LegacyRegistryInterceptor
+import me.abhigya.mappinggenerator.instrumentation.legacy.LegacyRegistryInterceptor
 import net.bytebuddy.agent.ByteBuddyAgent
 import net.bytebuddy.agent.builder.AgentBuilder
 import net.bytebuddy.description.type.TypeDescription

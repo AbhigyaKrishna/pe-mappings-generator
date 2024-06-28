@@ -1,7 +1,9 @@
-package me.abhigya.mappinggenerator.instrumentation
+package me.abhigya.mappinggenerator.instrumentation.legacy
 
 import me.abhigya.mappinggenerator.AbstractSerializer
 import me.abhigya.mappinggenerator.Transformer
+import me.abhigya.mappinggenerator.instrumentation.DataWatcherRegistryMapper
+import me.abhigya.mappinggenerator.instrumentation.KVMappers
 import me.abhigya.mappinggenerator.writeToFile
 import net.bytebuddy.agent.builder.AgentBuilder
 import net.bytebuddy.description.field.FieldDescription
@@ -109,7 +111,7 @@ object LegacyRegistryInterceptor : Transformer {
 
         private fun List<Pair<Any?, Any?>>.runOperation(): Map<String, String> {
             return run {
-                KVMappers.fold(this) { acc, mapper -> acc.map { mapper.map(it.first, it.second) } }
+                KVMappers.fold(this) { acc, mapper -> acc.map { DataWatcherRegistryMapper.map(it.first, it.second) } }
             }
                 .map { it.first.toString() to it.second.toString() }
                 .sortedBy { it.first }

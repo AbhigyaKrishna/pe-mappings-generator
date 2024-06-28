@@ -1,4 +1,4 @@
-package me.abhigya.mappinggenerator.instrumentation
+package me.abhigya.mappinggenerator.instrumentation.legacy
 
 import net.bytebuddy.description.type.TypeDescription
 import java.lang.reflect.Field
