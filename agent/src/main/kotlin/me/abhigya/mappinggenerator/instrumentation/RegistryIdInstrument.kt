@@ -42,26 +42,6 @@ object RegistryIdInstrument : Implementation {
             )
         } else {
             ByteCodeAppender { visitor, _, _ ->
-                visitor.visitFrame(
-                    Opcodes.F_FULL,
-                    5,
-                    arrayOf(
-                        thisType.internalName,
-                        "java/util/IdentityHashMap",
-                        Opcodes.INTEGER,
-                        Opcodes.INTEGER,
-                        "java/lang/Integer"
-                    ),
-                    5,
-                    arrayOf(
-                        thisType.internalName,
-                        "java/util/IdentityHashMap",
-                        Opcodes.INTEGER,
-                        Opcodes.INTEGER,
-                        "java/lang/Integer"
-                    )
-                )
-
                 visitor.visitCode()
                 visitor.visitTypeInsn(Opcodes.NEW, "java/util/IdentityHashMap") // 1
                 visitor.visitInsn(Opcodes.DUP) // 1
@@ -74,6 +54,7 @@ object RegistryIdInstrument : Implementation {
                 visitor.visitInsn(Opcodes.ARRAYLENGTH) // 0
                 visitor.visitVarInsn(Opcodes.ISTORE, 3) // -1
                 visitor.visitLabel(loop)
+                visitor.visitFrame(Opcodes.F_APPEND, 3, arrayOf("java/util/IdentityHashMap", Opcodes.INTEGER, Opcodes.INTEGER), 0, null)
                 visitor.visitVarInsn(Opcodes.ILOAD, 2) // 1
                 visitor.visitVarInsn(Opcodes.ILOAD, 3) // 1
                 visitor.visitJumpInsn(Opcodes.IF_ICMPGE, end) // -2
@@ -92,6 +73,7 @@ object RegistryIdInstrument : Implementation {
                 visitor.visitIincInsn(2, 1) // 0
                 visitor.visitJumpInsn(Opcodes.GOTO, loop) // 0
                 visitor.visitLabel(end)
+                visitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null)
                 visitor.visitVarInsn(Opcodes.ALOAD, 1) // 1
                 visitor.visitTypeInsn(Opcodes.CHECKCAST, "java/util/Map") // 0
                 visitor.visitInsn(Opcodes.ARETURN) // -1

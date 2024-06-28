@@ -28,7 +28,7 @@ pub fn get_java_for_version(version: &str, java_home: &JavaHome) -> Result<PathB
     };
 
     let mut path = PathBuf::from(jvm);
-    path.push("jre/bin/java");
+    path.push("bin/java");
 
     Ok(path)
 }

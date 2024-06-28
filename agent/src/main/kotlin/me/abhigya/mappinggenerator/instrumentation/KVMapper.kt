@@ -14,7 +14,7 @@ object DataWatcherRegistryMapper : KVMapper {
         if (value != null && value.javaClass.name.contains("DataWatcherRegistry")) {
             return key to (value.javaClass.genericInterfaces[0] as ParameterizedType).actualTypeArguments[0].typeName
                 .takeLastWhile { it != '.' }
-                .drop(1)
+                .dropLast(1)
                 .lowercase()
         }
 
