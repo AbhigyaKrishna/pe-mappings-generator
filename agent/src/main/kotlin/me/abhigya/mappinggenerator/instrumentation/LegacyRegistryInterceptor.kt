@@ -28,30 +28,39 @@ object LegacyRegistryInterceptor : Transformer {
     }
 
     override fun install(builder: DynamicType.Builder<*>, type: TypeDescription): DynamicType.Builder<*> {
-        return if (type.matches(versionRegex("DataWatcher"))) {
+        return if (type.matches(versionRegex("DataWatcher")) && type.name.contains(Regex("\\.v1_8_R\\d\\."))) { // only in 1.8
             builder.field(ElementMatchers.fieldType<FieldDescription>(Map::class.java)
                 .and(ElementMatchers.isStatic())
                 .and(ElementMatchers.isPrivate())
-                .and(ElementMatchers.isFinal())
-                .and { type.name.contains(Regex("\\.v1_8_R\\d\\.")) }) // only in 1.8
+                .and(ElementMatchers.isFinal()))
                 .transform { type, target ->
                     dataWatcher = DataWatcher(type.name, target.name)
                     target
                 }
         } else if (type.matches(versionRegex("(MinecraftServer|DedicatedServer)"))) {
-            builder.method(ElementMatchers.named("init"))
+            builder
+                .method(ElementMatchers.named("init"))
                 .intercept(SuperMethodCall.INSTANCE.andThen(MethodCall.run(DedicatedServerDelegate)))
         } else if (type.matches(versionRegex("RegistrySimple"))) {
-            builder.defineMethod("getMap", Map::class.java, Visibility.PUBLIC)
+            builder
+                .defineMethod("getMap", Map::class.java, Visibility.PUBLIC)
+                .intercept(RegistrySimpleInstrument)
+        } else if (type.matches(versionRegex("RegistryMaterials")) && type.superClass?.asErasure()?.typeName?.endsWith("RegistrySimple") != true) { // >= 1.13.1
+            builder
+                .defineMethod("getMap", Map::class.java, Visibility.PUBLIC)
                 .intercept(RegistrySimpleInstrument)
         } else if (type.matches(versionRegex("(RegistryID|RegistryBlockID)"))) {
             builder
                 .defineMethod("getMap", Map::class.java, Visibility.PUBLIC)
                 .intercept(RegistryIdInstrument)
         } else {
-            builder.field(ElementMatchers.fieldType<FieldDescription> { it.matches(versionRegex("Registry\\w+?")) }
+            if (type.matches(versionRegex("I?Registry\\w+?"))) {
+                println("Found registry ${type.name}")
+            }
+            builder
+                .field(ElementMatchers.fieldType<FieldDescription> { it.matches(versionRegex("I?Registry\\w+?")) }
                 .and(ElementMatchers.isStatic()))
-                .transform { type, target ->
+                .transform { _, target ->
                     registries.add(type.name to target.name)
                     target
                 }
