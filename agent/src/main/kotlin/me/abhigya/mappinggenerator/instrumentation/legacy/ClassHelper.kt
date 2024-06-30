@@ -1,6 +1,5 @@
 package me.abhigya.mappinggenerator.instrumentation.legacy
 
-import net.bytebuddy.description.type.TypeDescription
 import java.lang.reflect.Field
 
 data class DataWatcher(

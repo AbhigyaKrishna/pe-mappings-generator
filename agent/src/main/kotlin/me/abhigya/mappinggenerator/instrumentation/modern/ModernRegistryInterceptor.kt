@@ -5,7 +5,6 @@ import me.abhigya.mappinggenerator.Interceptor
 import me.abhigya.mappinggenerator.instrumentation.MapHelper
 import me.abhigya.mappinggenerator.instrumentation.doesClassMatches
 import me.abhigya.mappinggenerator.writeToFile
-import net.bytebuddy.agent.builder.AgentBuilder
 import net.bytebuddy.description.field.FieldDescription
 import net.bytebuddy.description.method.MethodDescription
 import net.bytebuddy.description.modifier.Visibility
@@ -22,8 +21,9 @@ object ModernRegistryInterceptor : Interceptor {
     private lateinit var loader: ClassLoader
     private val registries: MutableList<Pair<String, String>> = mutableListOf()
 
-    override fun configure(builder: AgentBuilder): AgentBuilder.Identified.Narrowable {
-        return builder.type(ElementMatchers.nameStartsWith("net.minecraft"))
+    override fun shouldBind(type: TypeDescription, loader: ClassLoader): Boolean {
+        return type.`package`?.name?.startsWith("net.minecraft.server") == true
+                && type.`package`?.name?.startsWith("net.minecraft.server.v1_") != true
     }
 
     override fun install(builder: DynamicType.Builder<*>, type: TypeDescription, classLoader: ClassLoader): DynamicType.Builder<*> {

@@ -19,8 +19,8 @@ object LegacyRegistryInterceptor : Interceptor {
     private val registries: MutableList<Pair<String, String>> = mutableListOf()
     private var dataWatcher: DataWatcher? = null
 
-    override fun configure(builder: AgentBuilder): AgentBuilder.Identified.Narrowable {
-        return builder.type(ElementMatchers.nameStartsWith("net.minecraft"))
+    override fun shouldBind(type: TypeDescription, loader: ClassLoader): Boolean {
+        return type.`package`?.name?.startsWith("net.minecraft.server.v1_") == true
     }
 
     override fun install(builder: DynamicType.Builder<*>, type: TypeDescription, classLoader: ClassLoader): DynamicType.Builder<*> {
